@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+env/
+venv/
+ENV/
+*.env
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints
+
+# MyPy, Pyright
+.mypy_cache/
+.pyright/
+
+# Test coverage
+htmlcov/
+.coverage
+.cache
+
+# Secret files
+secrets.env
