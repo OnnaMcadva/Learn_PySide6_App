@@ -1,40 +1,56 @@
 # Learn_PySide6_App
-A simple PySide6 application to practice creating GUI with buttons and layouts in Python.
+
+A simple PySide6 application designed to help you practice creating graphical user interfaces (GUIs) with buttons and layouts in Python.
+
+## Project Purpose
+
+This project serves as a learning playground for anyone interested in building desktop applications using [PySide6](https://doc.qt.io/qtforpython/). The primary goal is to provide hands-on experience with fundamental GUI components, layouts, and event handling in Python.
+
+## Features
+
+- **Basic GUI Elements:** Practice using buttons, labels, and input fields.
+- **Layouts:** Learn to arrange widgets using different layout managers.
+- **Event Handling:** Understand how to connect user actions to application logic.
+- **Clean Python Code:** Follows simple, beginner-friendly coding conventions.
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.7+
+- PySide6
+
+Install dependencies:
+
+```bash
+pip install PySide6
+```
+
+### Running the Application
+
+Clone the repository and run the main script:
+
+```bash
+git clone https://github.com/OnnaMcadva/Learn_PySide6_App.git
+cd Learn_PySide6_App
+python main.py
+```
+
+*(Replace `main.py` with the actual starting script if different.)*
+
+## Project Structure
+
+- `main.py` — Entry point of the application
+- Other scripts and folders — Contain additional widgets, layouts, and utility functions
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests to add new features or fix bugs.
+
+## License
+
+This project is for educational purposes. No license has been specified yet.
 
 ---
 
-## Key Features of PySide6:
-
-1. **Widgets**  
-   Buttons, input fields, labels, and more.  
-   PySide6 provides a wide range of customizable widgets for building interactive user interfaces, such as checkboxes, sliders, and combo boxes.
-
-2. **Signals and Slots**  
-   Mechanism for handling events.  
-   This event-driven system connects user actions (like clicks) to functions, enabling responsive applications with minimal code.
-
-3. **Layouts**  
-   Automatic arrangement of elements.  
-   Flexible layouts like QVBoxLayout and QHBoxLayout simplify responsive design, adapting to window resizing or different screen sizes.
-
-4. **Dialog Windows**  
-   Messages and file selection dialogs.  
-   PySide6 offers built-in dialogs for alerts, file pickers, and user prompts, streamlining common user interactions.
-
-5. **Styling**  
-   Customizing the appearance of applications.  
-   Use Qt Style Sheets (similar to CSS) or themes to change colors, fonts, and other visual properties effortlessly.
-
-6. **Multithreading**  
-   Working with threads in GUI applications.  
-   QThread enables background tasks, preventing the UI from freezing during heavy computations or network operations.
-
-7. **Animations**  
-   Smooth transitions and effects.  
-   PySide6’s animation framework allows for creating dynamic visual effects, like fading or moving widgets, to enhance user experience.
-
-8. **Graphics**  
-   Drawing and working with images.  
-   The QGraphicsView and QPainter classes support custom 2D graphics, image manipulation, and rendering of complex visual scenes.
-
----
+Happy learning and coding with PySide6!
