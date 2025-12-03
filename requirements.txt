@@ -1,0 +1,9 @@
+PySide6>=6.5
+PyYAML>=6.0
+ultralytics>=8.1
+opencv-python>=4.6
+numpy>=1.23
+torch>=2.0
+torchvision>=0.15
+torch==2.3.0+cu121
+torchvision==0.18.0+cu121
