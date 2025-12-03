@@ -1,20 +1,20 @@
 import sys
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton,
-    QLabel, QFileDialog, QLineEdit, QHBoxLayout
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QLabel, QPushButton, QLineEdit, QFileDialog, QCheckBox,
+    QDoubleSpinBox, QTextEdit, QSpinBox
 )
-from PySide6.QtGui import QScreen, QFont, QPalette, QColor
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 
-class DialogTestWindow(QMainWindow):
+class YOLOTrainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("YOLO Detect Train")
-        self.resize(560, 420)
+        self.resize(600, 600)
 
-        # ───── Исправляем центрирование под любой DPI и мультимонитор ─────
         screen = QApplication.primaryScreen()
-        screen_geometry = screen.availableGeometry()  # именно availableGeometry!
+        screen_geometry = screen.availableGeometry()
         center_x = (screen_geometry.width() - self.width()) // 2 + screen_geometry.x()
         center_y = (screen_geometry.height() - self.height()) // 2 + screen_geometry.y()
         self.move(center_x, center_y)
@@ -23,129 +23,182 @@ class DialogTestWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignTop)
-        layout.setSpacing(16)
-        layout.setContentsMargins(32, 32, 32, 32)
+        layout.setSpacing(12)
+        layout.setContentsMargins(24, 24, 24, 24)
         central_widget.setLayout(layout)
 
-        # ───── Заголовок ─────
         title = QLabel("YOLO Detect Train")
         title.setAlignment(Qt.AlignCenter)
         title.setObjectName("bigTitle")
         layout.addWidget(title)
 
-        # ───── Поля ввода ─────
-        self.inputs = {}
-        form_fields = ["data", "model", "epochs", "imgsz", "device"]
-        for field in form_fields:
-            hl = QHBoxLayout()
-            lbl = QLabel(f"{field}:")
-            lbl.setMinimumWidth(80)
-            edit = QLineEdit()
-            edit.setPlaceholderText(f"Enter {field}...")
-            hl.addWidget(lbl)
-            hl.addWidget(edit)
-            layout.addLayout(hl)
-            self.inputs[field] = edit
+        self.fields = {}
 
-        # ───── Кнопки ─────
-        self.file_btn = QPushButton("Choose File")
-        self.file_btn.clicked.connect(self.open_file)
-        layout.addWidget(self.file_btn)
+        # 1. Dataset folder
+        self._add_file_selector(layout, "Dataset", "Choose dataset folder", folder=True)
 
-        self.folder_btn = QPushButton("Choose Folder")
-        self.folder_btn.clicked.connect(self.open_folder)
-        layout.addWidget(self.folder_btn)
+        # 2. OUT folder
+        self._add_file_selector(layout, "OUTFolder", "Choose output folder", folder=True)
 
-        # ───── Результат ─────
-        self.result_label = QLabel("Results will be displayed here")
-        self.result_label.setWordWrap(True)
-        self.result_label.setAlignment(Qt.AlignCenter)
-        self.result_label.setMinimumHeight(80)
-        self.result_label.setObjectName("resultBox")
-        layout.addWidget(self.result_label)
+        # 3. Model name
+        self._add_text_input(layout, "Model Name", "String")
 
-        # ───── КРАСИВОЕ ОФОРМЛЕНИЕ — ТОЛЬКО РАБОЧИЕ СВОЙСТВА Qt! ─────
+        # 4. Train full model (Yes/No)
+        self._add_checkbox(layout, "Train full model")
+
+        # 5. Epochs
+        self._add_int_input(layout, "Epochs", 1, 1000, default=100)
+
+        # 6. Batch size
+        self._add_int_input(layout, "Batch size", 1, 128, default=16)
+
+        # 7. Validation split
+        self._add_float_input(layout, "Val", 0.0, 1.0, step=0.01, default=0.2)
+
+        # 8. Test split
+        self._add_float_input(layout, "Test", 0.0, 1.0, step=0.01, default=0.1)
+
+        # 9. Train button
+        train_btn = QPushButton("TRAIN!")
+        train_btn.clicked.connect(self.start_training)
+        layout.addWidget(train_btn)
+
+        # 10. Log area
+        self.log_area = QTextEdit()
+        self.log_area.setReadOnly(True)
+        self.log_area.setMinimumHeight(150)
+        self.log_area.setObjectName("resultBox")
+        layout.addWidget(self.log_area)
+
         self.setStyleSheet("""
             QMainWindow {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #e8f5f8, stop:0.5 #f0f9f5, stop:1 #f5e8f8);
                 font-family: "Segoe UI", "Roboto", sans-serif;
             }
-            
             QLabel#bigTitle {
-                font-size: 34px;
+                font-size: 32px;
                 font-weight: 700;
                 color: #2d6a4f;
-                padding: 10px;
-                margin-bottom: 10px;
+                padding: 8px;
             }
-            
             QLabel {
                 color: #1a535c;
                 font-size: 14px;
                 font-weight: 500;
             }
-            
-            QLineEdit {
-                padding: 12px 16px;
+            QLineEdit, QSpinBox, QDoubleSpinBox {
+                padding: 8px 12px;
                 border: 2px solid #a0d6db;
-                border-radius: 14px;
+                border-radius: 12px;
                 background-color: #ffffff;
-                font-size: 14px;
             }
-            QLineEdit:focus {
-                border: 2px solid #52b788;
-                background-color: #f8fffe;
-            }
-            
             QPushButton {
                 background-color: #74c69d;
                 color: white;
                 border: none;
-                padding: 14px;
-                border-radius: 16px;
+                padding: 12px;
+                border-radius: 14px;
                 font-size: 15px;
                 font-weight: 600;
             }
-            QPushButton:hover {
-                background-color: #95d5b2;
-            }
-            QPushButton:pressed {
-                background-color: #52b788;
-            }
-            
-            #resultBox {
+            QPushButton:hover { background-color: #95d5b2; }
+            QPushButton:pressed { background-color: #52b788; }
+            QTextEdit#resultBox {
                 background-color: rgba(255, 255, 255, 0.92);
                 border: 1px solid #cfe8e8;
-                border-radius: 18px;
-                padding: 20px;
-                font-size: 15px;
+                border-radius: 14px;
+                padding: 12px;
+                font-size: 14px;
                 color: #1a535c;
             }
         """)
-
-        # Более приятный системный шрифт
         app.setFont(QFont("Segoe UI", 10))
 
-    def open_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Choose File", "", "All Files (*);;Text Files (*.txt)"
-        )
-        if file_path:
-            self.result_label.setText(f"Selected file: {file_path}")
-        else:
-            self.result_label.setText("No file selected")
 
-    def open_folder(self):
-        folder_path = QFileDialog.getExistingDirectory(self, "Choose Folder")
-        if folder_path:
-            self.result_label.setText(f"Selected folder: {folder_path}")
+    def _add_file_selector(self, parent_layout, label_text, button_text, folder=False):
+        hl = QHBoxLayout()
+        lbl = QLabel(label_text)
+        lbl.setMinimumWidth(120)
+        line_edit = QLineEdit()
+        line_edit.setReadOnly(True)
+        btn = QPushButton(button_text)
+        if folder:
+            btn.clicked.connect(lambda: self._choose_folder(line_edit))
         else:
-            self.result_label.setText("No folder selected")
+            btn.clicked.connect(lambda: self._choose_file(line_edit))
+        hl.addWidget(btn)
+        hl.addWidget(line_edit)
+        parent_layout.addLayout(hl)
+        self.fields[label_text] = line_edit
 
+    def _choose_file(self, line_edit):
+        path, _ = QFileDialog.getOpenFileName(self, "Choose File", "", "All Files (*)")
+        if path: line_edit.setText(path)
+
+    def _choose_folder(self, line_edit):
+        path = QFileDialog.getExistingDirectory(self, "Choose Folder")
+        if path: line_edit.setText(path)
+
+    def _add_text_input(self, parent_layout, label_text, placeholder=""):
+        hl = QHBoxLayout()
+        lbl = QLabel(label_text)
+        lbl.setMinimumWidth(120)
+        edit = QLineEdit()
+        edit.setPlaceholderText(placeholder)
+        hl.addWidget(lbl)
+        hl.addWidget(edit)
+        parent_layout.addLayout(hl)
+        self.fields[label_text] = edit
+
+    def _add_checkbox(self, parent_layout, label_text):
+        hl = QHBoxLayout()
+        lbl = QLabel(label_text)
+        lbl.setMinimumWidth(120)
+        checkbox = QCheckBox()
+        hl.addWidget(lbl)
+        hl.addWidget(checkbox)
+        parent_layout.addLayout(hl)
+        self.fields[label_text] = checkbox
+
+    def _add_int_input(self, parent_layout, label_text, min_val, max_val, default=0):
+        hl = QHBoxLayout()
+        lbl = QLabel(label_text)
+        lbl.setMinimumWidth(120)
+        spin = QSpinBox()
+        spin.setRange(min_val, max_val)
+        spin.setValue(default)
+        hl.addWidget(lbl)
+        hl.addWidget(spin)
+        parent_layout.addLayout(hl)
+        self.fields[label_text] = spin
+
+    def _add_float_input(self, parent_layout, label_text, min_val, max_val, step=0.01, default=0.0):
+        hl = QHBoxLayout()
+        lbl = QLabel(label_text)
+        lbl.setMinimumWidth(120)
+        spin = QDoubleSpinBox()
+        spin.setRange(min_val, max_val)
+        spin.setSingleStep(step)
+        spin.setValue(default)
+        hl.addWidget(lbl)
+        hl.addWidget(spin)
+        parent_layout.addLayout(hl)
+        self.fields[label_text] = spin
+
+    def start_training(self):
+        self.log_area.append("Training started...")
+
+        for key, widget in self.fields.items():
+            if isinstance(widget, (QLineEdit, QSpinBox, QDoubleSpinBox)):
+                value = widget.text() if isinstance(widget, QLineEdit) else widget.value()
+            elif isinstance(widget, QCheckBox):
+                value = widget.isChecked()
+            self.log_area.append(f"{key}: {value}")
+        self.log_area.append("Training finished!")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = DialogTestWindow()
+    window = YOLOTrainWindow()
     window.show()
     sys.exit(app.exec())
