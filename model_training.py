@@ -9,7 +9,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtCore import Qt
 
 
-# --- фирменные цвета ŠKODA ---
+# --- ŠKODA brand colors ---
 SKODA_GREEN  = "#4BA82E"
 SKODA_GREEN2 = "#5CC13A"
 SKODA_DARK   = "#1A1A1A"
@@ -25,7 +25,7 @@ class DialogTestWindow(QMainWindow):
         self.setWindowTitle("YOLO Detect Train")
         self.resize(600, 520)
 
-        # ---- центрируем окно ----
+        # ---- Center window/obrazovka ----
         screen = QApplication.primaryScreen().geometry()
         self.move(
             (screen.width() - self.width()) // 2,
@@ -38,7 +38,7 @@ class DialogTestWindow(QMainWindow):
         layout.setAlignment(Qt.AlignTop)
         central_widget.setLayout(layout)
 
-        # ---- Заголовок ----
+        # ---- Title ----
         title = QLabel("ŠKODA — YOLO Detect Train")
         title.setAlignment(Qt.AlignCenter)
         title.setStyleSheet(f"""
@@ -51,7 +51,7 @@ class DialogTestWindow(QMainWindow):
         """)
         layout.addWidget(title)
 
-        # ---- форма ввода параметров ----
+        # ---- Input form ----
         self.inputs = {}
         form_fields = ["data", "model", "epochs", "imgsz", "device"]
 
@@ -60,14 +60,14 @@ class DialogTestWindow(QMainWindow):
             lbl = QLabel(f"{field}:")
             lbl.setMinimumWidth(80)
             edit = QLineEdit()
-            edit.setPlaceholderText(f"Введите {field}...")
+            edit.setPlaceholderText(f"Enter {field}...")
             hl.addWidget(lbl)
             hl.addWidget(edit)
             layout.addLayout(hl)
             self.inputs[field] = edit
 
-        # --- Автоматическое чтение доступных моделей ---
-        model_title = QLabel("Доступные модели:")
+        # --- Automatic scanning for available models ---
+        model_title = QLabel("Available models:")
         model_title.setStyleSheet("font-weight: bold; margin-top: 10px;")
         layout.addWidget(model_title)
 
@@ -75,28 +75,28 @@ class DialogTestWindow(QMainWindow):
         self.scan_models()
         layout.addWidget(self.model_list)
 
-        # ---- кнопка выбора файла ----
-        self.file_btn = QPushButton("Выбрать файл data.yaml")
+        # ---- Select data.yaml file ----
+        self.file_btn = QPushButton("Select data.yaml file")
         self.file_btn.clicked.connect(self.open_file)
         layout.addWidget(self.file_btn)
 
-        # ---- кнопка выбора папки ----
-        self.folder_btn = QPushButton("Выбрать папку с изображениями")
+        # ---- Select images folder ----
+        self.folder_btn = QPushButton("Select images folder")
         self.folder_btn.clicked.connect(self.open_folder)
         layout.addWidget(self.folder_btn)
 
-        # ---- кнопка сохранения в YAML ----
-        self.save_yaml_btn = QPushButton("Сохранить конфигурацию в YAML")
+        # ---- Save configuration to YAML ----
+        self.save_yaml_btn = QPushButton("Save configuration to YAML")
         self.save_yaml_btn.clicked.connect(self.save_yaml)
         layout.addWidget(self.save_yaml_btn)
 
-        # ---- кнопка запуска тренировки ----
-        self.run_btn = QPushButton("Запустить тренировку YOLO")
+        # ---- Run YOLO training ----
+        self.run_btn = QPushButton("Run YOLO training")
         self.run_btn.clicked.connect(self.run_training)
         layout.addWidget(self.run_btn)
 
-        # ---- метка результата ----
-        self.result_label = QLabel("Результаты будут отображаться здесь")
+        # ---- Result output ----
+        self.result_label = QLabel("Results will be shown here")
         self.result_label.setStyleSheet(f"""
             QLabel {{
                 background-color: {SKODA_LIGHT};
@@ -108,7 +108,7 @@ class DialogTestWindow(QMainWindow):
         """)
         layout.addWidget(self.result_label)
 
-        # ---- стили Škoda ----
+        # ---- ŠKODA style ----
         self.setStyleSheet(f"""
             QPushButton {{
                 background-color: {SKODA_GREEN};
@@ -127,11 +127,11 @@ class DialogTestWindow(QMainWindow):
         """)
 
     # ------------------------------------------------
-    #                ФУНКЦИИ GUI
+    #                GUI FUNCTIONS
     # ------------------------------------------------
 
     def scan_models(self):
-        """Читает модели из папки ./models"""
+        """Reads .pt models from ./models"""
         self.model_list.clear()
         model_path = "./models"
 
@@ -143,53 +143,52 @@ class DialogTestWindow(QMainWindow):
         if files:
             self.model_list.addItems(files)
         else:
-            self.model_list.addItem("(Нет файлов .pt)")
+            self.model_list.addItem("(No .pt files)")
         
     def open_file(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Выберите файл data.yaml", "", "YAML (*.yaml *.yml)")
+        path, _ = QFileDialog.getOpenFileName(self, "Select data.yaml file", "", "YAML (*.yaml *.yml)")
         if path:
             self.inputs["data"].setText(path)
-            self.result_label.setText(f"Выбран файл: {path}")
+            self.result_label.setText(f"Selected file: {path}")
         else:
-            self.result_label.setText("Файл не выбран")
+            self.result_label.setText("No file selected")
 
     def open_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "Выберите папку")
+        folder = QFileDialog.getExistingDirectory(self, "Select folder")
         if folder:
-            self.result_label.setText(f"Выбрана папка: {folder}")
+            self.result_label.setText(f"Selected folder: {folder}")
         else:
-            self.result_label.setText("Папка не выбрана")
+            self.result_label.setText("No folder selected")
 
-    # -------- сохранение YAML --------
+    # -------- Save YAML --------
     def save_yaml(self):
         cfg = {
             key: self.inputs[key].text() for key in self.inputs
         }
 
-        # Предлагаем сохранить файл
-        path, _ = QFileDialog.getSaveFileName(self, "Сохранить конфигурацию", "train_config.yaml", "YAML (*.yaml)")
+        path, _ = QFileDialog.getSaveFileName(self, "Save configuration", "train_config.yaml", "YAML (*.yaml)")
         if not path:
             return
 
         with open(path, "w", encoding="utf-8") as f:
             yaml.dump(cfg, f, allow_unicode=True)
 
-        self.result_label.setText(f"Конфигурация сохранена в: {path}")
+        self.result_label.setText(f"Configuration saved to: {path}")
 
-    # ---------- запуск тренировки ----------
+    # ---------- Run training ----------
     def run_training(self):
         vals = {key: self.inputs[key].text() for key in self.inputs}
 
-        # Если пользователь выбрал модель из списка — подставим её
-        if self.model_list.count() > 0 and self.model_list.currentText() != "(Нет файлов .pt)":
+        # If user selected model from list, use it
+        if self.model_list.count() > 0 and self.model_list.currentText() != "(No .pt files)":
             vals["model"] = "./models/" + self.model_list.currentText()
 
-        # Проверка
+        # Check required fields
         if not vals["data"] or not vals["model"]:
-            QMessageBox.warning(self, "Ошибка", "Нужно указать data= и model=")
+            QMessageBox.warning(self, "Error", "You must specify data= and model=")
             return
 
-        # Генерация команды
+        # Generate command
         cmd = (
             f"yolo detect train "
             f"data={vals['data']} "
@@ -199,13 +198,9 @@ class DialogTestWindow(QMainWindow):
             f"device={vals['device'] or '0'}"
         )
 
-        self.result_label.setText(f"Сгенерирована команда:\n{cmd}")
+        self.result_label.setText(f"Generated command:\n{cmd}")
 
-        # Здесь можно запускать выполнение:
-        # os.system(cmd)
-        # но пока просто показываем
-
-        QMessageBox.information(self, "Команда YOLO", f"Команда:\n{cmd}")
+        QMessageBox.information(self, "YOLO Command", f"Command:\n{cmd}")
 
 
 if __name__ == "__main__":
